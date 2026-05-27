@@ -1,4 +1,4 @@
-name: Build APK with Docker
+name: Build APK
 
 on:
   push:
@@ -7,34 +7,67 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: kivy/buildozer:ci
-
+    runs-on: ubuntu-20.04
+    
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
-
+      uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9.18'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          openjdk-11-jdk \
+          git \
+          zip \
+          unzip \
+          wget \
+          libncurses5 \
+          libstdc++6
+        
+        pip install --upgrade pip
+        pip install cython==0.29.33
+        pip install buildozer==1.5.0
+    
     - name: Build APK
       run: |
-        # Инициализируем конфиг
         buildozer init
         
-        # Правим buildozer.spec под ваш проект
+        # Настройка buildozer.spec
         sed -i 's/title = My Application/title = Shopping List/' buildozer.spec
         sed -i 's/package.name = myapp/package.name = shoppinglist/' buildozer.spec
         sed -i 's/package.domain = org.example/package.domain = com.mymmya/' buildozer.spec
         sed -i 's/# requirements = python3,kivy/requirements = python3,kivy==2.1.0,kivymd==1.1.1/' buildozer.spec
         sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
+        sed -i 's/# android.ndk = 19c/android.ndk = 23c/' buildozer.spec
+        sed -i 's/# android.sdk = 29/android.sdk = 30/' buildozer.spec
+        sed -i 's/# android.api = 30/android.api = 30/' buildozer.spec
+        sed -i 's/# android.minapi = 21/android.minapi = 24/' buildozer.spec
+        sed -i 's/# log_level = 2/log_level = 2/' buildozer.spec
         
-        # ЗАПУСКАЕМ СБОРКУ
+        # Добавляем permissions
+        echo "android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE" >> buildozer.spec
+        
+        # Запуск сборки
         buildozer android debug
-        
-        # Проверяем, создался ли APK
-        ls -la bin/
-
+    
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: shopping-list-apk
         path: bin/*.apk
         if-no-files-found: error
+        retention-days: 7
+    
+    - name: Upload build log if failed
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: .buildozer/logs/build.log
+        retention-days: 7
