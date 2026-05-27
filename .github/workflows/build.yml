@@ -7,28 +7,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest  # Меняем с ubuntu-20.04 на latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.9.18'
+        python-version: '3.9'
     
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          openjdk-11-jdk \
+          openjdk-17-jdk \
           git \
           zip \
           unzip \
-          wget \
-          libncurses5 \
-          libstdc++6
+          wget
         
         pip install --upgrade pip
         pip install cython==0.29.33
@@ -50,10 +48,8 @@ jobs:
         sed -i 's/# android.minapi = 21/android.minapi = 24/' buildozer.spec
         sed -i 's/# log_level = 2/log_level = 2/' buildozer.spec
         
-        # Добавляем permissions
         echo "android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE" >> buildozer.spec
         
-        # Запуск сборки
         buildozer android debug
     
     - name: Upload APK
@@ -62,12 +58,4 @@ jobs:
         name: shopping-list-apk
         path: bin/*.apk
         if-no-files-found: error
-        retention-days: 7
-    
-    - name: Upload build log if failed
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: .buildozer/logs/build.log
         retention-days: 7
