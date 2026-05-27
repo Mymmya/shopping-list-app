@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Специфическая версия для стабильности
     
     steps:
     - name: Checkout code
@@ -22,6 +22,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y openjdk-17-jdk git zip unzip wget
+        pip install --upgrade pip
         pip install buildozer cython==0.29.37
     
     - name: Create buildozer.spec
@@ -33,15 +34,16 @@ jobs:
         echo "source.dir = ." >> buildozer.spec
         echo "source.include_exts = py,png,jpg,kv,atlas,db" >> buildozer.spec
         echo "version = 0.1" >> buildozer.spec
-        echo "requirements = python3,kivy==2.2.1,kivymd==1.1.1" >> buildozer.spec
+        echo "requirements = python3,kivy==2.1.0,kivymd==1.1.1" >> buildozer.spec  # Понизил kivy
         echo "orientation = portrait" >> buildozer.spec
         echo "fullscreen = 0" >> buildozer.spec
         echo "android.accept_sdk_license = True" >> buildozer.spec
-        echo "android.ndk = 28c" >> buildozer.spec
+        echo "android.ndk = 25c" >> buildozer.spec  # Версия 25c
         echo "android.sdk = 30" >> buildozer.spec
         echo "android.api = 30" >> buildozer.spec
         echo "android.minapi = 24" >> buildozer.spec
         echo "log_level = 2" >> buildozer.spec
+        echo "warn_on_root = 0" >> buildozer.spec
         
     - name: Build APK
       run: buildozer android debug
