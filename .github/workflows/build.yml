@@ -11,10 +11,10 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
@@ -41,7 +41,6 @@ jobs:
     - name: Create buildozer.spec
       run: |
         buildozer init
-        # Редактируем buildozer.spec через sed
         sed -i 's/# requirements = python3,kivy/requirements = python3,kivy==2.1.0,kivymd==1.1.1/' buildozer.spec
         sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
         sed -i 's/# android.ndk = 19c/android.ndk = 25c/' buildozer.spec
@@ -51,9 +50,7 @@ jobs:
         sed -i 's/# log_level = 2/log_level = 2/' buildozer.spec
         sed -i 's/# orientation = landscape/orientation = portrait/' buildozer.spec
         sed -i 's/# fullscreen = 0/fullscreen = 0/' buildozer.spec
-        # Добавляем permissions
         echo "android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE" >> buildozer.spec
-        # Добавляем название приложения
         sed -i 's/title = My Application/title = Shopping List/' buildozer.spec
         sed -i 's/package.name = myapp/package.name = shoppinglist/' buildozer.spec
         sed -i 's/package.domain = org.example/package.domain = com.mymmya/' buildozer.spec
@@ -63,14 +60,17 @@ jobs:
         buildozer android debug 2>&1 | tee build.log
     
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: shopping-list-apk
         path: bin/*.apk
+        if-no-files-found: error
+        retention-days: 7
     
     - name: Upload build log if failed
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-log
         path: build.log
+        retention-days: 7
