@@ -2,60 +2,34 @@ name: Build APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Меняем с ubuntu-20.04 на latest
+    runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
-    - name: Install dependencies
+    - name: Install buildozer
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          openjdk-17-jdk \
-          git \
-          zip \
-          unzip \
-          wget
-        
-        pip install --upgrade pip
-        pip install cython==0.29.33
-        pip install buildozer==1.5.0
+        sudo apt-get install -y openjdk-17-jdk
+        pip install buildozer cython
     
     - name: Build APK
       run: |
         buildozer init
-        
-        # Настройка buildozer.spec
-        sed -i 's/title = My Application/title = Shopping List/' buildozer.spec
-        sed -i 's/package.name = myapp/package.name = shoppinglist/' buildozer.spec
-        sed -i 's/package.domain = org.example/package.domain = com.mymmya/' buildozer.spec
-        sed -i 's/# requirements = python3,kivy/requirements = python3,kivy==2.1.0,kivymd==1.1.1/' buildozer.spec
-        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-        sed -i 's/# android.ndk = 19c/android.ndk = 23c/' buildozer.spec
-        sed -i 's/# android.sdk = 29/android.sdk = 30/' buildozer.spec
-        sed -i 's/# android.api = 30/android.api = 30/' buildozer.spec
-        sed -i 's/# android.minapi = 21/android.minapi = 24/' buildozer.spec
-        sed -i 's/# log_level = 2/log_level = 2/' buildozer.spec
-        
-        echo "android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE" >> buildozer.spec
-        
         buildozer android debug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: shopping-list-apk
+        name: app
         path: bin/*.apk
-        if-no-files-found: error
-        retention-days: 7
