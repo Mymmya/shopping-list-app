@@ -26,7 +26,16 @@ jobs:
     - name: Build APK
       run: |
         buildozer init
-        buildozer android debug
+        
+        # Настраиваем buildozer.spec
+        sed -i 's/# requirements = python3,kivy/requirements = python3,kivy,kivymd/' buildozer.spec
+        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
+        sed -i 's/title = My Application/title = Shopping List/' buildozer.spec
+        sed -i 's/package.name = myapp/package.name = shoppinglist/' buildozer.spec
+        sed -i 's/package.domain = org.example/package.domain = com.mymmya/' buildozer.spec
+        
+        # Принимаем лицензию Android SDK
+        echo "y" | buildozer android debug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
