@@ -16,6 +16,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.list import OneLineAvatarIconListItem, ILeftBodyTouch, IRightBodyTouch
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.label import MDLabel
+from kivymd.uix.list import IconLeftWidget, IconRightWidget
 
 from database import Database
 
