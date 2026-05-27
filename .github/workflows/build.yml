@@ -37,7 +37,7 @@ jobs:
         echo "orientation = portrait" >> buildozer.spec
         echo "fullscreen = 0" >> buildozer.spec
         echo "android.accept_sdk_license = True" >> buildozer.spec
-        echo "android.ndk = 23c" >> buildozer.spec
+        echo "android.ndk = 28c" >> buildozer.spec
         echo "android.sdk = 30" >> buildozer.spec
         echo "android.api = 30" >> buildozer.spec
         echo "android.minapi = 24" >> buildozer.spec
